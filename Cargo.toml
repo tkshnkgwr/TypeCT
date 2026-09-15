@@ -1,0 +1,59 @@
+[package]
+name = "typect"
+version = "0.1.0"
+edition = "2021"
+description = "TypeCT - モダン打鍵・マウスクリック数計測デスクトップアプリ (Windows 11 64bit)"
+authors = ["TypeCT Development Team"]
+license = "MIT"
+readme = "README.md"
+
+[lib]
+name = "typect_lib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "typect"
+path = "src/main.rs"
+
+[dependencies]
+# GUI フレームワーク (egui / eframe)
+eframe = { version = "0.29", default-features = false, features = [
+    "default",
+    "glow",
+] }
+egui = "0.29"
+egui_plot = "0.29"
+
+# 入力監視フック (低遅延グローバルフック)
+rdev = "0.5"
+
+# データ永続化 (JSON)
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# 日時処理
+chrono = { version = "0.4", features = ["serde"] }
+
+# 二重起動防止 (Named Mutex)
+single-instance = "0.3"
+
+# タスクトレイ常駐 & 動的ツールチップ
+tray-icon = "0.19"
+
+# Windows 固有API
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = [
+    "Win32_System_Threading",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+[dev-dependencies]
+tempfile = "3.17"
+
+# リリースバイナリ極小化・高速化プロファイル
+[profile.release]
+opt-level = "z"       # サイズ最小化優先
+lto = true             # リンク時最適化を有効化
+codegen-units = 1      # 単一コード生成ユニットで最大最適化
+panic = "abort"        # パニック時スタック展開を省略してバイナリ削減
+strip = true           # デバッグシンボルを自動削除

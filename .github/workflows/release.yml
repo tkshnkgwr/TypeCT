@@ -1,0 +1,72 @@
+name: Release - Build & Publish Binary
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  lint-and-test:
+    name: 1. CI Quality Check & Unit Tests
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: rustfmt, clippy
+
+      - name: Check Rust Formatting
+        run: cargo fmt --check
+
+      - name: Run Clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Run Rust Unit & Integration Tests
+        run: cargo test --verbose
+
+  build-and-publish:
+    name: 2. Build Release Binary & Publish
+    needs: lint-and-test
+    permissions:
+      contents: write
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Build Release Binary
+        run: cargo build --release
+
+      - name: Package Release Assets (Windows x64)
+        shell: pwsh
+        run: |
+          $tag = if ("${{ github.ref_type }}" -eq "tag") { "${{ github.ref_name }}" } else { "v0.1.0-manual" }
+          $zipName = "TypeCT-$tag-windows-x64.zip"
+          
+          # Create zip archive with binary, readme, and license
+          Compress-Archive -Path target/release/typect.exe, README.md, README_JA.md, LICENSE -DestinationPath $zipName
+          
+          # Calculate SHA256 hash
+          $hash = (Get-FileHash -Path $zipName -Algorithm SHA256).Hash.ToLower()
+          "$hash  $zipName" | Out-File -FilePath "$zipName.sha256" -Encoding ascii
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            TypeCT-*-windows-x64.zip
+            TypeCT-*-windows-x64.zip.sha256
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
