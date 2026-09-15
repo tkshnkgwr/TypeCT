@@ -4,14 +4,42 @@ All notable changes to `TypeCT` are documented in this file.
 
 ---
 
+## [0.2.0] - 2026-09-15
+
+### 🚀 New Features (Major Roadmap Integration)
+
+- **Mouse Travel Distance Calculation**:
+  - Captures `rdev::MouseMove` events, calculating cumulative Euclidean distance in meters/kilometers (96 DPI baseline).
+  - Displays today's, yesterday's, and cumulative distance across summary cards.
+- **Keyboard Heatmap Tab**:
+  - Dedicated visual QWERTY keyboard heatmap tab.
+  - Multi-tiered gradient heat coloring (Blue -> Cyan -> Green -> Yellow -> Red) mapped to key frequency.
+  - Interactive hover tooltips showing individual count and ratio.
+- **Milestone Goal Toast Alerts**:
+  - Integrates `notify-rust` for native Windows toast alerts.
+  - Configurable daily keystroke goal (default: 10,000 keys) with once-per-day celebration toast.
+- **Dark / Light / System Theme Modes**:
+  - Instant theme switching with `egui::Visuals` and preference persistence.
+- **Windows Startup Auto-Launch Registration**:
+  - Leverages `winreg` to configure `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`.
+- **CSV Data Export**:
+  - One-click export of comprehensive statistics (summaries, 24-hour distribution, key frequency, button clicks, daily summary ledger) to CSV.
+- **Privacy-Preserving Daily Summary Ledger (`daily_history`)**:
+  - Automatically records historical daily totals (keystrokes, mouse clicks, travel distance) without storing individual key sequences or sensitive strings.
+  - Adds a "📅 Daily History (Recent)" grid to the Dashboard tab for effortless trend reviews.
+- **3-Tab Modular UI**:
+  - Reorganized interface with "📊 Dashboard", "⌨ Keyboard Heatmap", and "⚙ Settings" navigation.
+
+---
+
 ## [0.1.0] - 2026-09-15
 
 ### 🎉 Initial Release (Modern Rewrite)
 
 - **Complete Modern Rewrite**:
-  - Re-engineered classic Borland C++ 5.5 "TypeCT (typect.exe)" in Rust 2021 + `egui` native for Windows 11 (64-bit).
+  - Re-engineered classic Borland C++ 5.5 "TypeCT" in Rust 2021 + `egui` native for Windows 11 (64-bit).
 - **Single Instance Enforcement**:
-  - Windows Named Mutex (`single-instance`) prevents duplicate instances.
+  - Windows Named Mutex (`single-instance`) prevents duplicate processes.
 - **Japanese Font Anti-Tofu System**:
   - Automatic dynamic loading of Windows system fonts (Yu Gothic, Meiryo, MS Gothic).
 - **Zero-Lag Global Input Hook**:
@@ -32,5 +60,5 @@ All notable changes to `TypeCT` are documented in this file.
 - **Extreme Binary Optimization**:
   - Standalone binary with LTO, size optimization (`opt-level = "z"`), and symbol stripping.
 - **Test Suite & CI**:
-  - Comprehensive RustDoc and 16 unit, integration, and doc-tests.
+  - Comprehensive RustDoc and unit/integration test suite.
   - Automated GitHub Actions CI and Release pipelines.

@@ -1,6 +1,6 @@
 [package]
 name = "typect"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "TypeCT - モダン打鍵・マウスクリック数計測デスクトップアプリ (Windows 11 64bit)"
 authors = ["TypeCT Development Team"]
@@ -40,8 +40,12 @@ single-instance = "0.3"
 # タスクトレイ常駐 & 動的ツールチップ
 tray-icon = "0.19"
 
-# Windows 固有API
+# Windows ネイティブトースト通知 (目標打鍵数達成通知)
+notify-rust = "4"
+
+# Windows 固有API & スタートアップ登録
 [target.'cfg(windows)'.dependencies]
+winreg = "0.52"
 windows-sys = { version = "0.59", features = [
     "Win32_System_Threading",
     "Win32_UI_WindowsAndMessaging",

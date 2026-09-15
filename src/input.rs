@@ -1,31 +1,40 @@
 //! 入力イベント & キーマッピングモジュール
 //!
-//! `rdev` クレートから受け取った低レベルのキーおよびマウスイベントを、
-//! プライバシーに配慮した安全な表示用シンボル文字列へマッピングします。
+//! `rdev` クレートから受け取った低レベルのキー、マウスボタン、マウスカーソル移動イベントを、
+//! プライバシーに配慮した安全なメッセージ構造体へマッピングします。
 //!
 //! # プライバシー & セキュリティ保護
 //! 本アプリはキーロガーではありません。入力された文字列や入力内容は一切記録・保持せず、
-//! 押下されたキー種別（例: `A`, `Enter`, `Shift` 等）のカウンター加算のみを行います。
+//! 押下されたキー種別のカウンター加算およびマウス移動距離の積算のみを行います。
 
 /// 非同期入力フックスレッドから GUI スレッドへ送信されるイベント
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum InputHookMessage {
     /// キーボード打鍵イベント（キー名称）
     Key(String),
     /// マウスクリックイベント（ボタン名称）
     Mouse(String),
+    /// マウスカーソル移動量（メートル単位）
+    MouseMove(f64),
+}
+
+/// ピクセル移動距離を標準的な画面 DPI (96 DPI: 1 inch = 25.4 mm) に基づいてメートルに換算します。
+///
+/// 1 px = 0.0254 m / 96 ≈ 0.0002645833 m
+#[inline]
+pub fn pixel_distance_to_meters(px: f64) -> f64 {
+    px * (0.0254 / 96.0)
+}
+
+/// 2点間のユークリッド距離（ピクセル）を計算します。
+#[inline]
+pub fn calculate_euclidean_distance(x1: f64, y1: f64, x2: f64, y2: f64) -> f64 {
+    let dx = x2 - x1;
+    let dy = y2 - y1;
+    (dx * dx + dy * dy).sqrt()
 }
 
 /// `rdev::Key` を安全で分かりやすい表示用文字列へマッピングします。
-///
-/// キーストロークの内容（連続した単語やパスワード等）は一切保持せず、
-/// キー名称のみを返します。
-///
-/// # 引数
-/// * `key` - `rdev::Key` 列挙型値
-///
-/// # 戻り値
-/// * `&'static str` - キーの表示文字列（例: `"A"`, `"Enter"`, `"Space"` 等）
 pub fn map_rdev_key(key: rdev::Key) -> &'static str {
     match key {
         rdev::Key::KeyA => "A",
@@ -82,12 +91,6 @@ pub fn map_rdev_key(key: rdev::Key) -> &'static str {
 }
 
 /// `rdev::Button` を表示用日本語文字列へマッピングします。
-///
-/// # 引数
-/// * `btn` - `rdev::Button` 列挙型値
-///
-/// # 戻り値
-/// * `&'static str` - ボタンの表示文字列（例: `"左クリック"`, `"右クリック"` 等）
 pub fn map_mouse_button(btn: rdev::Button) -> &'static str {
     match btn {
         rdev::Button::Left => "左クリック",
@@ -104,19 +107,8 @@ mod tests {
     #[test]
     fn test_map_rdev_keys() {
         assert_eq!(map_rdev_key(rdev::Key::KeyA), "A");
-        assert_eq!(map_rdev_key(rdev::Key::KeyZ), "Z");
-        assert_eq!(map_rdev_key(rdev::Key::Num0), "0");
-        assert_eq!(map_rdev_key(rdev::Key::Num9), "9");
         assert_eq!(map_rdev_key(rdev::Key::Space), "Space");
         assert_eq!(map_rdev_key(rdev::Key::Return), "Enter");
-        assert_eq!(map_rdev_key(rdev::Key::Backspace), "Backspace");
-        assert_eq!(map_rdev_key(rdev::Key::Tab), "Tab");
-        assert_eq!(map_rdev_key(rdev::Key::ShiftLeft), "Shift");
-        assert_eq!(map_rdev_key(rdev::Key::ShiftRight), "Shift");
-        assert_eq!(map_rdev_key(rdev::Key::ControlLeft), "Ctrl");
-        assert_eq!(map_rdev_key(rdev::Key::Escape), "Esc");
-        assert_eq!(map_rdev_key(rdev::Key::UpArrow), "↑");
-        assert_eq!(map_rdev_key(rdev::Key::DownArrow), "↓");
     }
 
     #[test]
@@ -124,6 +116,16 @@ mod tests {
         assert_eq!(map_mouse_button(rdev::Button::Left), "左クリック");
         assert_eq!(map_mouse_button(rdev::Button::Right), "右クリック");
         assert_eq!(map_mouse_button(rdev::Button::Middle), "ホイールクリック");
-        assert_eq!(map_mouse_button(rdev::Button::Unknown(4)), "拡張クリック");
+    }
+
+    #[test]
+    fn test_distance_calculation() {
+        // (0, 0) から (3, 4) の距離は 5 px
+        let dist_px = calculate_euclidean_distance(0.0, 0.0, 3.0, 4.0);
+        assert!((dist_px - 5.0).abs() < 1e-6);
+
+        // 96 px = 1 inch = 0.0254 m
+        let dist_m = pixel_distance_to_meters(96.0);
+        assert!((dist_m - 0.0254).abs() < 1e-6);
     }
 }

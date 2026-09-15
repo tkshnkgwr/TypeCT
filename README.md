@@ -2,7 +2,7 @@
 
 # ⌨ TypeCT
 
-**Ultra-lightweight, high-precision Keystroke & Mouse Click Counter desktop app rebuilt for modern Windows 11 (64-bit native) in Rust + egui.**
+**Ultra-lightweight, high-precision Keystroke, Mouse Click & Travel Distance Counter desktop app rebuilt for modern Windows 11 (64-bit native) in Rust + egui.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Rust 2021](https://img.shields.io/badge/Rust-1.80%2B-orange.svg)](https://www.rust-lang.org)
@@ -19,7 +19,7 @@
 
 `TypeCT` is a modern, high-performance desktop counter app built with Rust and `egui`. It inherits the lightweight, unobtrusive, resident nature of the classic Windows freeware "TypeCT (タイプ数カウンター)" originally written in Borland C++ 5.5, while revamping it with modern design principles and safety guarantees for Windows 11 (64-bit).
 
-It accurately captures keystrokes and mouse clicks in the background with zero input lag, rendering real-time statistics, hourly distributions over the past 24 hours, and key frequency rankings in an immediate-mode GUI. Furthermore, if legacy binary files (`data` / `data2`) from the old TypeCT exist in the directory, it automatically imports and migrates past cumulative data upon first launch.
+It accurately captures keystrokes, mouse clicks, and **mouse travel distance (meters/kilometers)** in the background with zero input lag, rendering real-time statistics, hourly distributions, an interactive **Keyboard Heatmap**, and configurable milestone notifications. Furthermore, if legacy binary files (`data` / `data2`) from the old TypeCT exist in the directory, it automatically imports and migrates past cumulative data upon first launch.
 
 ---
 
@@ -29,12 +29,14 @@ It accurately captures keystrokes and mouse clicks in the background with zero i
 - 🔤 **Automatic Japanese Font Detection**: Automatically loads Windows OS standard fonts (Yu Gothic, Meiryo, MS Gothic) to completely eliminate "tofu" (□) mojibake.
 - ⚡ **Zero-Lag Global Input Hook**: Captures global input asynchronously via `rdev` on a dedicated background thread, dispatching events to the GUI via non-blocking channels without typing delays.
 - 🛡️ **Privacy & Security by Design**: Strictly NOT a keylogger. Does NOT record or store text, words, or passwords; only increments aggregated count totals per keycode.
+- 🐭 **Real-Time Mouse Travel Distance**: Continuously calculates cursor travel distance in meters and kilometers (96 DPI baseline) for today, yesterday, and cumulative total.
+- ⌨ **Visual Keyboard Heatmap**: Renders an interactive QWERTY layout colored by typing intensity (Blue -> Cyan -> Green -> Yellow -> Red).
+- 🎯 **Milestone Goal Toast Alerts**: Native Windows toast notification upon reaching your daily keystroke target (default: 10,000 keys).
+- 🎨 **Color Themes**: Toggle seamlessly between `💻 System`, `🌙 Dark`, and `☀️ Light` modes.
+- 🚀 **Windows Startup Auto-Launch**: Configure Windows logon auto-start with a single checkbox via `winreg`.
+- 📊 **CSV Data Export**: Export daily, hourly, key frequency, and mouse button statistics to CSV.
 - 📂 **Seamless Legacy Data Migration**: Automatically parses legacy fixed-length binary dump files (`data`: keystrokes, `data2`: mouse clicks) and migrates historical counts to `typect.json`.
-- 📊 **Modern Analytics Dashboard (egui + egui_plot)**:
-  - Summary cards (Today, Yesterday, Cumulative Total, Days Recorded, Daily Average).
-  - Hourly keystroke bar chart over the past 24 hours.
-  - Top 12 key rankings with animated progress bars.
-- 📥 **Taskbar Tray Resident & Dynamic Tooltips**: Minimizes to the Windows system tray on close or minimize. Hovering over the tray icon displays real-time counts (e.g., `TypeCT - 今日: 6,183打 / 4,952クリック`).
+- 📥 **Taskbar Tray Resident & Dynamic Tooltips**: Minimizes to the Windows system tray on close or minimize. Hovering over the tray icon displays real-time counts and travel distance.
 - 🍃 **Zero-Overhead Power Efficiency**: Halts rendering loop when minimized or in background, maintaining 0% idle CPU usage.
 - 📦 **Compact Self-Contained Binary**: Employs LTO (Link-Time Optimization), size optimization (`opt-level = "z"`), and symbol stripping to generate a minimal standalone binary without external DLL dependencies.
 
@@ -64,20 +66,15 @@ The compiled binary will be placed at `target/release/typect.exe`.
 
 ## 💾 Migrating Legacy Data from Classic "TypeCT"
 
-If you have years of accumulated records from the original Borland C++ version:
-
-1. Place the new `typect.exe` into your desired folder (e.g., `%USERPROFILE%\Tools\TypeCT\`).
-2. Copy your old data files into the same directory:
+1. Copy your old data files into the same directory as `typect.exe`:
    - `data` : Legacy keystroke binary file
    - `data2` : Legacy mouse click binary file
-3. Launch `typect.exe`.
-4. The files will be detected and automatically imported into modern `typect.json`. A status badge will confirm: `※ 旧 typect (data / data2) からの累計データを引き継ぎ済み`.
+2. Launch `typect.exe`.
+3. Historical records will automatically be detected and merged into `typect.json`.
 
 ---
 
 ## 📁 Data Format (`typect.json`)
-
-Data is persisted as human-readable JSON in `typect.json` in the application directory automatically upon exit and every 5 minutes:
 
 ```json
 {
@@ -87,6 +84,9 @@ Data is persisted as human-readable JSON in `typect.json` in the application dir
   "total_clicks": 125000,
   "today_clicks": 1200,
   "yesterday_clicks": 950,
+  "total_mouse_distance_m": 1250.4,
+  "today_mouse_distance_m": 350.2,
+  "yesterday_mouse_distance_m": 420.8,
   "days_recorded": 120,
   "last_date": "2026-09-15",
   "hourly_keys": [0, 0, 0, 0, 0, 0, 15, 120, 850, 1200, ...],
@@ -99,6 +99,10 @@ Data is persisted as human-readable JSON in `typect.json` in the application dir
     "左クリック": 980,
     "右クリック": 220
   },
+  "daily_goal_keys": 10000,
+  "goal_notified": false,
+  "theme": "System",
+  "auto_start": false,
   "legacy_imported": true
 }
 ```
@@ -112,13 +116,16 @@ src/
 ├── lib.rs       # Library root & public module exports
 ├── main.rs      # Application entry point (Single instance, input hook thread, eframe launch)
 ├── legacy.rs    # Legacy binary header parser (LegacyHeader)
-├── model.rs     # Data structures (TypeCtData), rollover, JSON persistence
-├── input.rs     # Input messages (InputHookMessage), key/button mapping
+├── model.rs     # Data structures (TypeCtData), rollover, JSON persistence, CSV export
+├── input.rs     # Input messages (InputHookMessage), key mapping, distance calculation
 ├── font.rs      # Windows Japanese font discovery & registration (setup_japanese_fonts)
 ├── tray.rs      # Self-contained 32x32 RGBA taskbar tray icon generator
-└── app.rs       # GUI application implementation (TypeCtApp)
+├── heatmap.rs   # Keyboard layout definition & heatmap rendering
+├── notify.rs    # Windows milestone toast notification (notify-rust)
+├── startup.rs   # Windows startup registry management (winreg)
+└── app.rs       # GUI application implementation (TypeCtApp: 3 tabs)
 tests/
-└── integration_test.rs # Integration test suite (Legacy import -> Persistence -> Rollover)
+└── integration_test.rs # Integration test suite (Legacy import -> Persistence -> Rollover -> CSV)
 ```
 
 ---
