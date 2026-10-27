@@ -7,7 +7,7 @@ This document provides detailed technical specifications for `TypeCT`, an ergono
 ## 1. System Overview
 
 - **Name**: TypeCT (Keystroke, Mouse Click & Travel Counter)
-- **Version**: 0.2.1
+- **Version**: 0.3.0
 - **Target OS**: Windows 11 (64-bit native) / Windows 10 (64-bit)
 - **Language**: Rust (2021 Edition)
 - **Key Dependencies**:

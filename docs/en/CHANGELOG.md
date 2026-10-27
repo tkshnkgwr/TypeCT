@@ -4,6 +4,16 @@ All notable changes to `TypeCT` are documented in this file.
 
 ---
 
+## [0.3.0] - 2026-10-27
+
+### 📄 License Migration (GPL-3.0-or-later)
+
+- **License Migration**:
+  - Migrated distribution license from MIT to **GNU General Public License v3.0 or later (GPL-3.0-or-later)**.
+  - Synchronized license metadata and badges across `Cargo.toml`, `README.md`, `README_JA.md`, `LICENSE`, and documentation.
+
+---
+
 ## [0.2.1] - 2026-10-27
 
 ### 🔧 Improvements & Documentation Synchronization

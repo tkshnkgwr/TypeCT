@@ -9,7 +9,7 @@ This report summarizes automated verification, unit/integration test results, an
 - **OS**: Windows 11 (64-bit)
 - **Rust Toolchain**: rustc 1.80+ (stable-x86_64-pc-windows-msvc)
 - **Report Date**: 2026-10-27
-- **Target Version**: v0.2.1
+- **Target Version**: v0.3.0
 
 ---
 

@@ -4,7 +4,7 @@
 
 **Windows 11 (64bitネイティブ) 向けに刷新された、Rust + egui 製の超軽量・高機能な打鍵・マウスクリック数・マウス移動距離計測デスクトップアプリ**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: GPL-3.0-or-later](https://img.shields.io/badge/License-GPL--3.0--or--later-blue.svg)](LICENSE)
 [![Rust 2021](https://img.shields.io/badge/Rust-1.80%2B-orange.svg)](https://www.rust-lang.org)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2011%20(64bit)-lightgrey.svg)](https://github.com/tkshnkgwr/TypeCT)
 [![CI](https://img.shields.io/badge/CI-Passing-brightgreen.svg)](.github/workflows/ci.yml)
@@ -160,4 +160,4 @@ tests/
 
 ## 📄 ライセンス
 
-本ソフトウェアは [MIT License](LICENSE) のもとで公開されています。
+本ソフトウェアは [GNU General Public License v3.0 or later (GPL-3.0-or-later)](LICENSE) のもとで公開されています。

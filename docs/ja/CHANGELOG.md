@@ -4,6 +4,16 @@
 
 ---
 
+## [0.3.0] - 2026-10-27
+
+### 📄 ライセンス移行 (GPL-3.0-or-later)
+
+- **ライセンスの変更**:
+  - 本ソフトウェアの配布ライセンスを MIT License から **GNU General Public License v3.0 or later (GPL-3.0-or-later)** へ移行。
+  - `Cargo.toml`, `README.md`, `README_JA.md`, `LICENSE`, 各種ドキュメントにおけるライセンス表記・バッジを同期。
+
+---
+
 ## [0.2.1] - 2026-10-27
 
 ### 🔧 改善 & ドキュメント整合性向上
