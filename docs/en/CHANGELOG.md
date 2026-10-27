@@ -15,6 +15,8 @@ All notable changes to `TypeCT` are documented in this file.
   - `README.md` / `README_JA.md`: Synchronized `daily_history` JSON schema example and restored full project documentation overview.
 - **LICENSE Formatting**:
   - Removed UTF-8 BOM and restored trailing newline.
+- **CI Build Error Fix**:
+  - Resolved `float-literal-f32-fallback` compiler warning on modern Rust toolchains by explicitly typing float literals in `src/heatmap.rs` (`1.0_f32`, `4.0_f32`).
 
 ---
 

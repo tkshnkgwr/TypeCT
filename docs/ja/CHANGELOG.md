@@ -15,6 +15,8 @@
   - `README.md` / `README_JA.md`: `daily_history` スキーマ例の追記、および欠落していた構成情報の復元。
 - **LICENSE ファイルのフォーマット正常化**:
   - UTF-8 BOM を除去し、末尾改行を追加。
+- **CI ビルドエラー修正**:
+  - 最新 Rust ツールチェーンにおける `float-literal-f32-fallback` 警告に対応し、`src/heatmap.rs` 内の浮動小数点リテラル型を明示化（`1.0_f32`, `4.0_f32`）。
 
 ---
 

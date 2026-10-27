@@ -199,12 +199,12 @@ pub fn render_keyboard_heatmap(ui: &mut egui::Ui, key_counts: &HashMap<String, u
 
                     let painter = ui.painter();
                     // キー背景
-                    painter.rect_filled(rect, 4.0, fill_color);
+                    painter.rect_filled(rect, 4.0_f32, fill_color);
                     // キー枠線
                     painter.rect_stroke(
                         rect,
-                        4.0,
-                        egui::Stroke::new(1.0, Color32::from_rgb(71, 85, 105)),
+                        4.0_f32,
+                        egui::Stroke::new(1.0_f32, Color32::from_rgb(71, 85, 105)),
                     );
 
                     // テキスト色（背景の明るさに応じて調整）
