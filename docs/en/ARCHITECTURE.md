@@ -42,20 +42,26 @@ src/
 ├── lib.rs       # Library root & public re-exports
 ├── main.rs      # Binary entry point (Single instance, thread spawn, eframe startup)
 ├── legacy.rs    # Legacy binary (data / data2) parser (LegacyHeader)
-├── model.rs     # Data structures (TypeCtData), rollover logic, JSON persistence
-├── input.rs     # Input messages (InputHookMessage) & safe key mapping
+├── model.rs     # Data structures (TypeCtData), rollover logic, JSON persistence, CSV export
+├── input.rs     # Input messages (InputHookMessage), safe key mapping, distance calculation
 ├── font.rs      # Windows Japanese font discovery (setup_japanese_fonts)
 ├── tray.rs      # Embedded 32x32 RGBA tray icon generation (create_embedded_tray_icon)
-└── app.rs       # GUI application implementation (TypeCtApp)
+├── heatmap.rs   # Keyboard layout definition & heatmap rendering
+├── notify.rs    # Milestone goal toast notifications (notify-rust)
+├── startup.rs   # Windows startup registry management (winreg)
+└── app.rs       # GUI application implementation (TypeCtApp: 3 tabs)
 ```
 
 ### 2.1 Module Responsibilities
 - **`legacy.rs`**: Parses 28-byte binary headers defensively against malformed files.
-- **`model.rs`**: Maintains counters, calculates daily averages, handles date rollovers, and serializes JSON.
-- **`input.rs`**: Converts raw hardware events into sanitized display names, preventing keylogging.
+- **`model.rs`**: Maintains counters, daily summary ledger, rollover logic, JSON persistence, and CSV export.
+- **`input.rs`**: Converts raw hardware events into sanitized display names and calculates Euclidean mouse travel distance.
 - **`font.rs`**: Dynamically discovers and registers standard Windows CJK fonts to prevent "tofu".
 - **`tray.rs`**: Renders a clean 32x32 RGBA system tray icon in memory without external `.ico` assets.
-- **`app.rs`**: Orchestrates event polling, tray click reactions, periodic saving, and UI rendering.
+- **`heatmap.rs`**: Defines QWERTY keyboard layout and computes dynamic 4-tier heatmap gradient colors.
+- **`notify.rs`**: Manages Windows milestone toast notifications when reaching the daily keystroke goal.
+- **`startup.rs`**: Handles Windows registry (`HKCU\...\Run`) auto-start registration and deregistration.
+- **`app.rs`**: Orchestrates event polling, tray click reactions, periodic saving, 3-tab layout, and UI rendering.
 
 ---
 
@@ -63,8 +69,8 @@ src/
 
 1. **Input Monitoring Thread**:
    - Spawns via `std::thread::spawn` and executes `rdev::listen`.
-   - Listens exclusively for `KeyPress` and `ButtonPress` events.
-   - Pushes sanitised messages through `mpsc::Sender<InputHookMessage>`.
+   - Listens for `KeyPress`, `ButtonPress`, and `MouseMove` events.
+   - Pushes sanitized messages through `mpsc::Sender<InputHookMessage>`.
 2. **Main GUI Thread**:
    - Runs `eframe::App::update`.
    - Drains all pending events via non-blocking `try_recv()` at the start of each frame.

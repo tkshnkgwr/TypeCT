@@ -1,9 +1,9 @@
 [package]
 name = "typect"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 description = "TypeCT - モダン打鍵・マウスクリック数計測デスクトップアプリ (Windows 11 64bit)"
-authors = ["TypeCT Development Team"]
+authors = ["tkshnkgwr"]
 license = "MIT"
 readme = "README.md"
 

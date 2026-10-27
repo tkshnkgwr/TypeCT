@@ -103,6 +103,13 @@ The compiled binary will be placed at `target/release/typect.exe`.
   "goal_notified": false,
   "theme": "System",
   "auto_start": false,
+  "daily_history": {
+    "2026-09-14": {
+      "keys": 3800,
+      "clicks": 950,
+      "mouse_distance_m": 420.8
+    }
+  },
   "legacy_imported": true
 }
 ```

@@ -42,19 +42,25 @@ src/
 ├── lib.rs       # ライブラリのルートモジュール & 再エクスポート
 ├── main.rs      # エントリーポイント（二重起動防止、入力スレッド起動、ウィンドウ起動）
 ├── legacy.rs    # 旧バイナリ（data / data2）ヘッダ解析モジュール (LegacyHeader)
-├── model.rs     # 集計データモデル (TypeCtData)、ロールオーバー、JSON保存
-├── input.rs     # 入力フックメッセージ (InputHookMessage) & 安全マッピング
+├── model.rs     # 集計データモデル (TypeCtData)、ロールオーバー、JSON保存、CSV出力
+├── input.rs     # 入力フックメッセージ (InputHookMessage)、安全マッピング、距離換算
 ├── font.rs      # 日本語フォント探索・豆腐化防止モジュール (setup_japanese_fonts)
 ├── tray.rs      # 自己完結型 32x32 RGBA トレイアイコン動的生成 (create_embedded_tray_icon)
-└── app.rs       # GUI アプリケーション本体 (TypeCtApp)
+├── heatmap.rs   # キーボード配列定義 & ヒートマップグラデーション描画
+├── notify.rs    # 目標打鍵数達成 Windows トースト通知
+├── startup.rs   # Windows スタートアップ登録管理 (winreg)
+└── app.rs       # GUI アプリケーション本体 (TypeCtApp: 3タブ構成)
 ```
 
 ### 2.1 モジュールの責務
 - **`legacy.rs`**: 旧バイナリ 28 バイトヘッダのパース。破損データに対する防御的パース。
-- **`model.rs`**: 状態データの一元管理。日付またぎ時のスライド更新、インポート処理、JSON 保存。
-- **`input.rs`**: キーコードから表示文字列への純粋変換。パスワードや文字列の保持を構造的に不可能にする防壁。
+- **`model.rs`**: 状態データの一元管理。日付またぎ時のスライド更新、日毎サマリー台帳永続化、インポート処理、JSON 保存、CSV 出力。
+- **`input.rs`**: キーコードから表示文字列への純粋変換、マウス移動座標差分からのユークリッド距離積算。パスワードや文字列の保持を構造的に不可能にする防壁。
 - **`font.rs`**: OS のフォントディレクトリから日本語フォントを優先探索し `egui` に登録。
 - **`tray.rs`**: 外部 `.ico` ファイル不要でアイコンをピクセル単位で構築。
+- **`heatmap.rs`**: QWERTY キー配列定義、最高打鍵比率に基づく4段階カラーグラデーション描画。
+- **`notify.rs`**: 目標打鍵数到達時の Windows ネイティブトースト通知制御。
+- **`startup.rs`**: Windows レジストリ (`HKCU\...\Run`) への自動起動エントリ登録・解除。
 - **`app.rs`**: イベント受信、タスクトレイイベント処理、定期保存、UI描画、省電力待機制御。
 
 ---
@@ -64,7 +70,7 @@ src/
 1. **入力監視スレッド**:
    - `std::thread::spawn` により生成。
    - `rdev::listen` を常駐実行。
-   - キー押下 (`rdev::EventType::KeyPress`) およびマウスボタン押下 (`rdev::EventType::ButtonPress`) のみを検出。
+   - キー押下 (`rdev::EventType::KeyPress`)、マウスボタン押下 (`rdev::EventType::ButtonPress`)、およびマウスカーソル移動 (`rdev::EventType::MouseMove`) を検出。
    - `mpsc::Sender<InputHookMessage>` を通じてメインスレッドへ送信。
 2. **GUIメインスレッド**:
    - `eframe::run_native` による UI イベントループ。

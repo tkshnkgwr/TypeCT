@@ -4,6 +4,20 @@ All notable changes to `TypeCT` are documented in this file.
 
 ---
 
+## [0.2.1] - 2026-10-27
+
+### 🔧 Improvements & Documentation Synchronization
+
+- **Comprehensive Documentation Realignment**:
+  - `ARCHITECTURE.md`: Added module responsibilities for `heatmap.rs`, `notify.rs`, and `startup.rs`; updated concurrency model with `MouseMove` event capture.
+  - `TESTING.md`: Expanded test matrix to cover all 23 test cases (19 unit, 3 integration, 1 doc-test) with vertical table alignment.
+  - `TEST_REPORT.md`: Updated execution logs to match latest test suite (23/23 PASS).
+  - `README.md` / `README_JA.md`: Synchronized `daily_history` JSON schema example and restored full project documentation overview.
+- **LICENSE Formatting**:
+  - Removed UTF-8 BOM and restored trailing newline.
+
+---
+
 ## [0.2.0] - 2026-09-15
 
 ### 🚀 New Features (Major Roadmap Integration)
